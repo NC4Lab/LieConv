@@ -15,6 +15,8 @@ from lie_conv.lieGroups import SO3
 from torchdiffeq import odeint_adjoint as odeint
 from corm_data.utils import initialize_datasets
 import torchvision
+from ipynb.fs.full.utils import getTrainingData
+# from working/utils.utils.ipynb" import getTrainingData
 
 
 #ModelNet40 code adapted from 
@@ -135,6 +137,59 @@ class RandomRotateTranslate(nn.Module):
         flowgrid = F.affine_grid(affineMatrices.to(img.device), size = img.shape)
         transformed_img = F.grid_sample(img,flowgrid)
         return transformed_img
+
+
+
+
+@export 
+# class rotatingTurtleBot(Dataset):
+#     default_root_dir = os.path.abspath('~/home/nc4lab/code/enn')
+#     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
+#         self.img_labels = pd.read_csv
+#         self.img_dir = img_dir
+#         self.transform = transform
+#         self.target_transform = target_transform
+
+class rotatingTurtleBot(Dataset):
+    default_root_dir = os.path.abspath('~/home/nc4lab/code/enn')
+    # def __init__(self, data):
+    #     self.data = getTrainingData()
+
+    # def __len__(self):
+    #     return len(self.data)
+
+    # def __getitem__(self, idx):
+    #     sample = {
+    #         'time' : self.data.loc[idx, 'time'],
+    #         'roll_angle': self.data.loc[idx, 'roll_angle'],
+    #         'measure1': self.data.loc[idx, 'measure1'],
+    #         'measure2': self.data.loc[idx, 'measure2'],
+    #     }
+    #     return sample
+
+
+
+    def __init__(self, transform=None):
+        super().__init__(self)
+        self.data = getTrainingData()
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        sample = self.data.iloc[idx]
+        time = sample['time']
+        roll_angle = sample['roll_angle']
+        measure1 = sample['measure1']
+        measure2 = sample['measure2']
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return [measure1, measure2], roll_angle
+    def items():
+        return self.data[["measure1", "measure2"]], self.data[["roll_angle"]]
 
 @export
 class RotMNIST(EasyIMGDataset,torchvision.datasets.MNIST):
@@ -560,6 +615,7 @@ def QM9datasets(root_dir=default_qm9_dir):
         os.makedirs(root_dir, exist_ok=True)
         torch.save((datasets, num_species, charge_scale),filename)
         return (datasets, num_species, charge_scale)
+
 
 
 # class SchPackQM9(Dataset):
