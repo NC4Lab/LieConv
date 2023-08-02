@@ -27,6 +27,7 @@ def makeTrainer(*, dataset=MnistRotDataset, network=ImgLieResnet, num_epochs=100
     model = network(num_targets=datasets['train'].num_targets,**net_config).to(device)
     if aug: model = torch.nn.Sequential(datasets['train'].default_aug_layers(),model)
     model,bs = try_multigpu_parallelize(model,bs)
+    print(dataset.items())
 
     dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=(k=='train'),
                 num_workers=0,pin_memory=False),device) for k,v in datasets.items()}

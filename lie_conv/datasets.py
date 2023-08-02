@@ -170,26 +170,41 @@ class rotatingTurtleBot(Dataset):
 
 
     def __init__(self, transform=None):
-        super().__init__(self)
+        super().__init__()
         self.data = getTrainingData()
+        # pself.data)
         self.transform = transform
 
     def __len__(self):
+        # print(len(self.data))
         return len(self.data)
 
     def __getitem__(self, idx):
-        sample = self.data.iloc[idx]
-        time = sample['time']
-        roll_angle = sample['roll_angle']
-        measure1 = sample['measure1']
-        measure2 = sample['measure2']
+        # sample = self.data.iloc[idx]
+        # time = sample['time']
+        # roll_angle = sample['roll_angle']
+        # measure1 = sample['measure1']
+        # measure2 = sample['measure2']
 
-        if self.transform:
-            sample = self.transform(sample)
+        item = self.data[idx]
 
+        # The item will be a tuple of tensors (measure1, measure2, roll_angle)
+        measure1, measure2, roll_angle = item
+
+        # Print the values of measure1, measure2, and roll_angle
+        # print("Measure 1:", measure1)
+        # print("Measure 2:", measure2)
+        # print("Roll Angle:", roll_angle)
+        # if self.transform:
+        #     sample = self.transform(sample)
+        # return [measure1, measure2], roll_angle
+        # return tuple(tensor[idx] for tensor in self.data)
         return [measure1, measure2], roll_angle
-    def items():
-        return self.data[["measure1", "measure2"]], self.data[["roll_angle"]]
+
+    def items(self):
+        return "train", self.data
+    #     # print(self.data[["measure1", "measure2"]])
+    #     return self.data[["measure1", "measure2"]], self.data[["roll_angle"]]
 
 @export
 class RotMNIST(EasyIMGDataset,torchvision.datasets.MNIST):

@@ -329,7 +329,7 @@ class LieResNet(nn.Module):
         self.group = group
 
     def forward(self, x):
-        lifted_x = self.group.lift(x,self.liftsamples)
+        lifted_x = self.group.lift(self=self,x=x, nsamples=self.liftsamples)
         return self.net(lifted_x)
 
 @export
