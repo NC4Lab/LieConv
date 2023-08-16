@@ -69,16 +69,8 @@ class LieGroup(object):
         # print("measures in lift after calcs ----> ", measures[0])
 
         
-        # print("v[0]
-        # p = SO2()
-        # v,m = x
-        # x2 = np.array(x)
-        # print("v---->", v[0])
 
-        # print("nsamples ---->", nsamples)
-        # print("x shape ----> ", x2.shape)
-        # raise Exception
-
+        #train_turtle
         turtle = rotatingTurtleBot()
         # print("x's shape in lift :  ", x)
         p = turtle.getR()
@@ -86,7 +78,7 @@ class LieGroup(object):
         expanded_a,expanded_q = self.lifted_elems(self = SO2, pt= p, nsamples=1,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
 
 
-
+        #train_img
         # p,v,m=x
         # expanded_a,expanded_q = self.lifted_elems(p, nsamples,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
 
@@ -105,9 +97,11 @@ class LieGroup(object):
         expanded_v = v[...,None,:].repeat((1,)*len(v.shape[:-1])+(nsamples,1)) # (bs,n,c) -> (bs,n,1,c) -> (bs,n,ns,c)
         print("expanded_v --- ", expanded_v.shape)
         # print("expanded_q --- ", expanded_q.shape)
-        print("expanded_a shape in lift -- ", *expanded_a.shape)
+        print("expanded_a shape in lift -- ", *expanded_a.shape[:-1])
+        print("v's size --", v.shape[-1])
 
         expanded_v = expanded_v.reshape(*expanded_a.shape[:-1],v.shape[-1]) # (bs,n,ns,c) -> (bs,n*ns,c)
+        print("expanded_v after reshape -- ", expanded_v.shape)
         expanded_mask = m[...,None].repeat((1,)*len(v.shape[:-1])+(nsamples,)) # (bs,n) -> (bs,n,ns)
         expanded_mask = expanded_mask.reshape(*expanded_a.shape[:-1]) # (bs,n,ns) -> (bs,n*ns)
         # convert from elems to pairs
