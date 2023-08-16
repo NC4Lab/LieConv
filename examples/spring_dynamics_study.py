@@ -8,15 +8,17 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from oil.utils.utils import LoaderTo, islice, FixedNumpySeed, cosLr
 from lie_conv.datasets import SpringDynamics
-from lie_conv.dynamicsTrainer import IntegratedDynamicsTrainer,FCHamNet, RawDynamicsNet, LieResNetT2, HLieResNet
-from lie_conv.liegroups import T, SO2, Trivial
-from graphnets import OGN,HOGN, VOGN
-from lie_conv.dynamics_trial import DynamicsTrial
+from lie_conv.lieConv import LieResNet
+from lie_conv.dynamicsTrainer import IntegratedDynamicsTrainer,HLieResNet #   ,FCHamNet, RawDynamicsNet, LieResNetT2, 
+from lie_conv.lieGroups import T, SO2, Trivial
+from lie_conv.graphnets import OGN,HOGN, VOGN
+# from lie_conv.dynamicsTrainer import Dy
+# from lie_conv.dynamicsTrainer import DynamicsTrial
 from oil.tuning.configGenerator import sample_config, flatten_dict,grid_iter
 import os
 
 def makeTrainer(*,network,net_cfg,lr=1e-2,n_train=5000,regen=False,
-                dtype=torch.float32,device=torch.device('cuda'),bs=200,num_epochs=2,
+                dtype=torch.float32,device=torch.device('cpu'),bs=200,num_epochs=2,
                 trainer_config={'log_dir':'data_scaling_study_final'}):
     # Create Training set and model
     splits = {'train':n_train,'val':min(n_train,2000),'test':2000}
@@ -56,14 +58,14 @@ class MiniTrial(object):
 Trial = MiniTrial(makeTrainer)
 
 best_hypers = [
-    {'network':RawDynamicsNet,'net_cfg':{'k':256},'lr':3e-3},
-    {'network':FCHamNet,'net_cfg':{'k':256,'num_layers':4},'lr':1e-2},
-    {'network':HLieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':T(2)}, 'lr':1e-3},
-    {'network':HLieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':SO2()}, 'lr':3e-4},
-    {'network':HLieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':Trivial(2)}, 'lr':1e-3},
-    {'network':VOGN,'net_cfg':{'k':512},'lr':3e-3},
-    {'network':HOGN,'net_cfg':{'k':256},'lr':1e-2},
-    {'network':OGN,'net_cfg':{'k':256},'lr':1e-2},
+    # {'network':RawDynamicsNet,'net_cfg':{'k':256},'lr':3e-3},
+    # {'network':FCHamNet,'net_cfg':{'k':256,'num_layers':4},'lr':1e-2},
+    # {'network':HLieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':T(2)}, 'lr':1e-3},
+    {'network':LieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':SO2()}, 'lr':3e-4},
+    # {'network':HLieResNet, 'net_cfg':{'k':384, 'num_layers':4, 'group':Trivial(2)}, 'lr':1e-3},
+    # {'network':VOGN,'net_cfg':{'k':512},'lr':3e-3},
+    # {'network':HOGN,'net_cfg':{'k':256},'lr':1e-2},
+    # {'network':OGN,'net_cfg':{'k':256},'lr':1e-2},
 ]
 
 if __name__ == '__main__':

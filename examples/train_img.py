@@ -16,7 +16,7 @@ from lie_conv.datasets import MnistRotDataset
 
 
 def makeTrainer(*, dataset=MnistRotDataset, network=ImgLieResnet, num_epochs=100,
-                bs=50, lr=3e-3, aug=True, optim=Adam, device='cuda', trainer=Classifier,
+                bs=50, lr=3e-3, aug=True, optim=Adam, device='cpu', trainer=Classifier,
                 split={'train':12000}, small_test=False, net_config={}, opt_config={},
                 trainer_config={'log_dir':None}):
 
@@ -27,11 +27,16 @@ def makeTrainer(*, dataset=MnistRotDataset, network=ImgLieResnet, num_epochs=100
     model = network(num_targets=datasets['train'].num_targets,**net_config).to(device)
     if aug: model = torch.nn.Sequential(datasets['train'].default_aug_layers(),model)
     model,bs = try_multigpu_parallelize(model,bs)
-    print(dataset.items())
+    # print(dataset.items())
 
-    dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=(k=='train'),
+    dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=False,
                 num_workers=0,pin_memory=False),device) for k,v in datasets.items()}
+    
+    # train_features, train_labels = next(iter(dataloaders['train']))
+    # print("train_features in train_img", train_features)
+
     dataloaders['Train'] = islice(dataloaders['train'],1+len(dataloaders['train'])//10)
+
     if small_test: dataloaders['test'] = islice(dataloaders['test'],1+len(dataloaders['train'])//10)
     # Add some extra defaults if SGD is chosen
     opt_constr = partial(optim, lr=lr, **opt_config)

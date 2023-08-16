@@ -64,4 +64,5 @@ class MolecLieResNet(LieResNet):
         with torch.no_grad():
             x = self.featurize(mb)
             x = self.random_rotate(x) if self.aug else x
+        print("x in molecLieResNet --- >", x)
         return super().forward(x).squeeze(-1)

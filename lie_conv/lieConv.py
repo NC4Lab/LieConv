@@ -308,7 +308,7 @@ class LieResNet(nn.Module):
         """
     def __init__(self, chin, ds_frac=1, num_outputs=1, k=1536, nbhd=np.inf,
                 act="swish", bn=True, num_layers=6, mean=True, per_point=True,pool=True,
-                liftsamples=1, fill=1/4, group=SE3,knn=False,cache=False, **kwargs):
+                liftsamples=1, fill=1/4, group= SO2,knn=False,cache=False, **kwargs):
         super().__init__()
         if isinstance(fill,(float,int)):
             fill = [fill]*num_layers
@@ -329,7 +329,10 @@ class LieResNet(nn.Module):
         self.group = group
 
     def forward(self, x):
-        lifted_x = self.group.lift(self=self,x=x, nsamples=self.liftsamples)
+        print("x in the forward function -->", x)
+        # lifted_x = self.group.lift(x=x, nsamples=self.liftsamples)
+        lifted_x = self.group.lift(self= SO2, x=x,nsamples=self.liftsamples)
+        # lifted_x = self.group.lift(x,self.liftsamples)
         return self.net(lifted_x)
 
 @export
@@ -351,7 +354,7 @@ class ImgLieResnet(LieResNet):
         bs,c,h,w = x.shape
         # Construct coordinate grid
         i = torch.linspace(-h/2.,h/2.,h)
-        j = torch.linspace(-w/2.,w/2.,w)
+        j = torch.linspace(-w/2.,w/2.,w)    
         coords = torch.stack(torch.meshgrid([i,j]),dim=-1).float()
         # Perform center crop
         center_mask = coords.norm(dim=-1)<15. # crop out corners (filled only with zeros)
@@ -360,6 +363,7 @@ class ImgLieResnet(LieResNet):
         values = x.permute(0,2,3,1)[:,center_mask,:].reshape(bs,-1,c)
         mask = torch.ones(bs,values.shape[1],device=x.device)>0 # all true
         z = (coords,values,mask)
+        # print("the ex in forward function ", x)
         # Perform lifting of the coordinates and cache results
         with torch.no_grad():
             if self.lifted_coords is None:

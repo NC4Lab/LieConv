@@ -22,7 +22,7 @@ except ImportError:
                 `pip install .[GN]` for this functionality', ImportWarning)
 
 def makeTrainer(*,network=FC,net_cfg={},lr=1e-2,n_train=3000,regen=False,dataset=SpringDynamics,
-                dtype=torch.float32,device=torch.device('cuda'),bs=200,num_epochs=2,
+                dtype=torch.float32,device=torch.device('cpu'),bs=200,num_epochs=2,
                 trainer_config={}):
     # Create Training set and model
     splits = {'train':n_train,'val':200,'test':2000}

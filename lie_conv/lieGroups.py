@@ -1,6 +1,10 @@
 import torch
 import numpy as np
+import math
 from lie_conv.utils import export, Named
+# from ipynb.fs.full.utils import getTrainingData
+
+
 
 @export
 def norm(x,dim):
@@ -53,13 +57,56 @@ class LieGroup(object):
         return ab_dist*self.alpha + (1-self.alpha)*qa_qb_dist
     
     def lift(self,x,nsamples,**kwargs):
+        from lie_conv.datasets import rotatingTurtleBot
+
         """assumes p has shape (*,n,2), vals has shape (*,n,c), mask has shape (*,n)
             returns (a,v) with shapes [(*,n*nsamples,lie_dim),(*,n*nsamples,c)"""
-        p,v,m = x
-        expanded_a,expanded_q = self.lifted_elems(p,nsamples,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
+        # p_int, __ = turtle.__getitem__(2)
+        # # need to return the items meaasure 1 and 2 as tensor
+        # measures = turtle.measures()
+        # # p is the r value, in our case it is sq(m1_sq+ m2_sq)
+        # # p = math.sqrt((measures[0])**2 + (measures[1])**2)
+        # print("measures in lift after calcs ----> ", measures[0])
+
+        
+        # print("v[0]
+        # p = SO2()
+        # v,m = x
+        # x2 = np.array(x)
+        # print("v---->", v[0])
+
+        # print("nsamples ---->", nsamples)
+        # print("x shape ----> ", x2.shape)
+        # raise Exception
+
+        turtle = rotatingTurtleBot()
+        # print("x's shape in lift :  ", x)
+        p = turtle.getR()
+        v,m = x
+        expanded_a,expanded_q = self.lifted_elems(self = SO2, pt= p, nsamples=1,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
+
+
+
+        # p,v,m=x
+        # expanded_a,expanded_q = self.lifted_elems(p, nsamples,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
+
+
+
+        print("p in lift---->", p.shape[:3])
+        print("aned printing p in lift -- ", p)
+        print("printing self in lift - ", self)
+        print("x----> shape in lift", x)
+
         nsamples = expanded_a.shape[-2]//m.shape[-1]
+        print("nsamples in lift -- ", nsamples)
+        print("m in lift -- ", m.shape)
+        print("v's size --", v.shape)
         # expand v and mask like q
         expanded_v = v[...,None,:].repeat((1,)*len(v.shape[:-1])+(nsamples,1)) # (bs,n,c) -> (bs,n,1,c) -> (bs,n,ns,c)
+        print("expanded_v --- ", expanded_v.shape)
+        # print("expanded_q --- ", expanded_q.shape)
+        print("expanded_a shape in lift -- ", *expanded_a.shape)
+
         expanded_v = expanded_v.reshape(*expanded_a.shape[:-1],v.shape[-1]) # (bs,n,ns,c) -> (bs,n*ns,c)
         expanded_mask = m[...,None].repeat((1,)*len(v.shape[:-1])+(nsamples,)) # (bs,n) -> (bs,n,ns)
         expanded_mask = expanded_mask.reshape(*expanded_a.shape[:-1]) # (bs,n,ns) -> (bs,n*ns)
@@ -168,6 +215,7 @@ class T(LieGroup):
 
     def lifted_elems(self,xyz,nsamples,**kwargs):
         assert nsamples==1, "Abelian group, no need for nsamples"
+        print("pt in lifted_elems T--  ", xyz)
         return xyz,None
     
     def elems2pairs(self,a):
@@ -241,6 +289,7 @@ class SO2(LieGroup):
     def lifted_elems(self,pt,nsamples=1):
         """ pt (bs,n,D) mask (bs,n), per_point specifies whether to
             use a different group element per atom in the molecule"""
+        print("pt in lifted_elems in SO2 ---> ", pt)
         assert nsamples==1, "Abelian group, no need for nsamples"
         bs,n,D = pt.shape[:3] # origin = [1,0]
         assert D==2, "Lifting from R^2 to SO(2) supported only"

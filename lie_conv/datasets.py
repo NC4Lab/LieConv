@@ -7,7 +7,7 @@ import numpy as np
 import warnings
 import h5py
 import os
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, TensorDataset
 from .utils import Named, export, Expression, FixedNumpySeed, RandomZrotation, GaussianNoise
 from oil.datasetup.datasets import EasyIMGDataset
 from lie_conv.hamiltonian import HamiltonianDynamics, KeplerH, SpringH
@@ -15,7 +15,12 @@ from lie_conv.lieGroups import SO3
 from torchdiffeq import odeint_adjoint as odeint
 from corm_data.utils import initialize_datasets
 import torchvision
-from ipynb.fs.full.utils import getTrainingData
+# import sys
+# sys.path.append('../..')  
+# import nbimporter
+# from working.utils import getTrainingData
+
+# from ipynb.fs.full.utils import getTrainingData
 # from working/utils.utils.ipynb" import getTrainingData
 
 
@@ -149,9 +154,10 @@ class RandomRotateTranslate(nn.Module):
 #         self.img_dir = img_dir
 #         self.transform = transform
 #         self.target_transform = target_transform
-
 class rotatingTurtleBot(Dataset):
-    default_root_dir = os.path.abspath('~/home/nc4lab/code/enn')
+    # default_root_dir = os.path.abspath('~/home/nc4lab/code/enn/')
+    # from working.utils import getTrainingData
+
     # def __init__(self, data):
     #     self.data = getTrainingData()
 
@@ -165,11 +171,16 @@ class rotatingTurtleBot(Dataset):
     #         'measure1': self.data.loc[idx, 'measure1'],
     #         'measure2': self.data.loc[idx, 'measure2'],
     #     }
-    #     return sample
+    #     return samp
 
 
 
     def __init__(self, transform=None):
+        # default_root_dir = os.path.abspath('~/home/nc4lab/code/enn')
+        import sys, os
+        sys.path.append('../..')  
+        # print(os.getcwd())
+        from utils import getTrainingData
         super().__init__()
         self.data = getTrainingData()
         # pself.data)
@@ -186,6 +197,7 @@ class rotatingTurtleBot(Dataset):
         # measure1 = sample['measure1']
         # measure2 = sample['measure2']
 
+
         item = self.data[idx]
 
         # The item will be a tuple of tensors (measure1, measure2, roll_angle)
@@ -200,9 +212,28 @@ class rotatingTurtleBot(Dataset):
         # return [measure1, measure2], roll_angle
         # return tuple(tensor[idx] for tensor in self.data)
         return [measure1, measure2], roll_angle
+    
+    def measures(self):
+        # print(self.data)
+        return TensorDataset(self.data.tensors[0], self.data.tensors[1])
+    
+    def getR(self):
+        tensor_data = torch.stack([self.data.tensors[0], self.data.tensors[1]], dim=-1)
+        print(tensor_data)
+        batch_size = 50  # Change this to the desired batch size
+        num_elements = tensor_data.size(0)  # Get the number of elements
 
-    def items(self):
-        return "train", self.data
+        # Reshape the tensor_data to have dimensions (batch_size, num_elements, 2)
+        tensor_data = tensor_data.unsqueeze(0).expand(batch_size, num_elements, 2)
+        # tensor_data = tensor_data.unsqueeze(1).expand(-1, batch_size, -1, 2)
+
+        return tensor_data
+
+        # return torch.tensor(torch.sqrt(torch.square(self.data.tensors[0]) + torch.square(self.data.tensors[1])))
+        # return torch.stack((self.data[:,0], self.data[:,1]), dim=2)
+
+    # def items(self):
+    #     return "train", self.data
     #     # print(self.data[["measure1", "measure2"]])
     #     return self.data[["measure1", "measure2"]], self.data[["roll_angle"]]
 

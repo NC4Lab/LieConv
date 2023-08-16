@@ -31,7 +31,9 @@ def makeTrainer(*, dataset= rotatingTurtleBot, network=LieResNet, num_epochs=10,
     # datasets['test'] = dataset()
     datasets["train"] = rotatingTurtleBot()
     device = torch.device(device)
-    model = network(chin=2, **net_config).to(device)
+    model = network(chin=1, **net_config).to(device)
+    # model = network(num_targets=datasets['train'].num_targets,**net_config).to(device)
+
     # dataloader = torch.utils.data.DataLoader(dataset, batch_size=bs,
     #                                       shuffle=False, num_workers=0)
     if aug: model = torch.nn.Sequential(datasets['train'].default_aug_layers(),model)
@@ -52,8 +54,10 @@ def makeTrainer(*, dataset= rotatingTurtleBot, network=LieResNet, num_epochs=10,
     # # dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=True,
     # #             num_workers=0,pin_memory=False),device) for k,v in    }
 
-    dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=True,
+    dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=False,
                 num_workers=0,pin_memory=False),device) for k,v in datasets.items()}
+    # train_features, train_labels = next(iter(dataloaders["train"]))
+    # print("dataloaders in train_turtle", train_labels.size())
     # dataloaders = DataLoader(rotatingTurtleBot, batch_size=64, shuffle=True)
     # test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
 
@@ -71,9 +75,10 @@ def makeTrainer(*, dataset= rotatingTurtleBot, network=LieResNet, num_epochs=10,
 if __name__=="__main__":
     Trial = train_trial(makeTrainer)
     defaults = copy.deepcopy(makeTrainer.__kwdefaults__)
-    defaults.update({
-        'net_config':{'liftsamples':2}
-    })
+    # defaults = makeTrainer.__kwdefaults__.copy()
+    # defaults.update({
+    #     'net_config':{'liftsamples':2, 'group': lieGroups.SO2}
+    # })
     defaults['save'] = False
     Trial(argupdated_config(defaults,namespace=(lieConv,lieGroups)))
 
