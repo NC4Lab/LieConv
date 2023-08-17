@@ -71,16 +71,17 @@ class LieGroup(object):
         
 
         #train_turtle
-        turtle = rotatingTurtleBot()
-        # print("x's shape in lift :  ", x)
-        p = turtle.getR()
-        v,m = x
-        expanded_a,expanded_q = self.lifted_elems(self = SO2, pt= p, nsamples=1,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
+        # turtle = rotatingTurtleBot()
+        print("x's shape in lift :  ", len(x))
+        print("x's shape in lift :  ", x)
+        # p = turtle.getR()
+        # v,m = x
+        # expanded_a,expanded_q = self.lifted_elems(self = SO2, pt= p, nsamples=1,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
 
 
         #train_img
-        # p,v,m=x
-        # expanded_a,expanded_q = self.lifted_elems(p, nsamples,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
+        p,v,m=x
+        expanded_a,expanded_q = self.lifted_elems(p, nsamples,**kwargs) # (bs,n*ns,d), (bs,n*ns,qd)
 
 
 

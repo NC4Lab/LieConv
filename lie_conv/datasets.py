@@ -183,12 +183,17 @@ class rotatingTurtleBot(Dataset):
         from utils import getTrainingData
         super().__init__()
         self.data = getTrainingData()
+        self.x = torch.from_numpy(self.data[:,:-1])
+        self.y = torch.from_numpy(self.data[:,[2]])
+        self.n_samples = self.x.shape[0]
+
+
         # pself.data)
         self.transform = transform
 
     def __len__(self):
         # print(len(self.data))
-        return len(self.data)
+        return self.n_samples
 
     def __getitem__(self, idx):
         # sample = self.data.iloc[idx]
@@ -198,10 +203,13 @@ class rotatingTurtleBot(Dataset):
         # measure2 = sample['measure2']
 
 
-        item = self.data[idx]
+        # item = self.data[idx]
+
+        # if self.transform:
+        #     item = self.transform(item)
 
         # The item will be a tuple of tensors (measure1, measure2, roll_angle)
-        measure1, measure2, roll_angle = item
+        # measure1, measure2, roll_angle = item
 
         # Print the values of measure1, measure2, and roll_angle
         # print("Measure 1:", measure1)
@@ -211,11 +219,13 @@ class rotatingTurtleBot(Dataset):
         #     sample = self.transform(sample)
         # return [measure1, measure2], roll_angle
         # return tuple(tensor[idx] for tensor in self.data)
-        return [measure1, measure2], roll_angle
+        # return [measure1, measure2], roll_angle
+        return self.x[idx], self.y[idx]
     
     def measures(self):
         # print(self.data)
-        return TensorDataset(self.data.tensors[0], self.data.tensors[1])
+        # return TensorDataset(self.data.tensors[0], self.data.tensors[1])
+        return self.x
     
     def getR(self):
         tensor_data = torch.stack([self.data.tensors[0], self.data.tensors[1]], dim=-1)

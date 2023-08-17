@@ -60,6 +60,10 @@ def makeTrainer(*, dataset= rotatingTurtleBot, network=LieResNet, num_epochs=10,
     # print("dataloaders in train_turtle", train_labels.size())
     # dataloaders = DataLoader(rotatingTurtleBot, batch_size=64, shuffle=True)
     # test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
+    
+    first = datasets["train"][0]
+    # train_features, train_labels = next(iter(dataloaders['train']))
+    print("train_features in train_img", first)
 
 
     # dataloaders = {k:LoaderTo(DataLoader(v,batch_size=bs,shuffle=True,
